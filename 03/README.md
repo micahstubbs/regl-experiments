@@ -1,4 +1,4 @@
-this iteration tweaks the color values inside of `regl.frame()` just a bit, mixing **sine** and **cos** and speeding up the color transition
+this iteration tweaks the color values inside of `regl.frame()` just a bit, mixing **sine** and **cosine** and speeding up the color transition
 
 ---
 
