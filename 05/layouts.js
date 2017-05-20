@@ -1,3 +1,5 @@
+/* global d3 */
+
 /**
  * Given a set of points, lay them out in a phyllotaxis layout.
  * Mutates the `points` passed in by updating the x and y values.
@@ -20,8 +22,8 @@ function phyllotaxisLayout(points, pointWidth, xOffset = 0, yOffset = 0, iOffset
     const phylloX = pointRadius * Math.sqrt(index) * Math.cos(index * theta);
     const phylloY = pointRadius * Math.sqrt(index) * Math.sin(index * theta);
 
-    point.x = xOffset + phylloX - pointRadius;
-    point.y = yOffset + phylloY - pointRadius;
+    point.x = (xOffset + phylloX) - pointRadius;
+    point.y = (yOffset + phylloY) - pointRadius;
   });
 
   return points;
@@ -91,7 +93,7 @@ function sineLayout(points, pointWidth, width, height) {
 
   points.forEach((point, i) => {
     point.x = (i / points.length) * (width - pointWidth);
-    point.y = amplitude * Math.sin(yScale(i)) + yOffset;
+    point.y = (amplitude * Math.sin(yScale(i))) + yOffset;
   });
 
   return points;
@@ -115,7 +117,7 @@ function spiralLayout(points, pointWidth, width, height) {
   const periods = 20;
 
   const rScale = d3.scaleLinear()
-    .domain([0, points.length -1])
+    .domain([0, points.length - 1])
     .range([0, Math.min(width / 2, height / 2) - pointWidth]);
 
   const thetaScale = d3.scaleLinear()
@@ -123,14 +125,12 @@ function spiralLayout(points, pointWidth, width, height) {
     .range([0, periods * 2 * Math.PI]);
 
   points.forEach((point, i) => {
-    point.x = rScale(i) * Math.cos(thetaScale(i)) + xOffset
-    point.y = rScale(i) * Math.sin(thetaScale(i)) + yOffset;
+    point.x = (rScale(i) * Math.cos(thetaScale(i))) + xOffset;
+    point.y = (rScale(i) * Math.sin(thetaScale(i))) + yOffset;
   });
 
   return points;
 }
-
-
 
 
 /**
