@@ -1,8 +1,8 @@
 console.clear()
 
-var regl = createREGL()
+const regl = createREGL();
 
-var drawTriangle = regl({
+const drawTriangle = regl({
   vert: `
     precision mediump float;
     attribute vec2 position;
@@ -28,10 +28,10 @@ var drawTriangle = regl({
     ]
   },
   count: 3
-})
+});
 
 
-regl.frame(function () {
+regl.frame(() => {
   regl.clear({
     color: [0, .5*(1 + Math.cos(Date.now()/2000)), 1, 1],
     depth: 1
