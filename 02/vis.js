@@ -1,4 +1,6 @@
-console.clear()
+/* global createREGL */
+
+console.clear();
 
 const regl = createREGL();
 
@@ -23,19 +25,19 @@ const drawTriangle = regl({
   attributes: {
     position: [
       [1, 0],
-      [0, 1], 
-      [-1, -1]
-    ]
+      [0, 1],
+      [-1, -1],
+    ],
   },
-  count: 3
+  count: 3,
 });
 
 
 regl.frame(() => {
   regl.clear({
-    color: [0, .5*(1 + Math.cos(Date.now()/2000)), 1, 1],
-    depth: 1
-  })
+    color: [0, 0.5 * (1 + Math.cos(Date.now() / 2000)), 1, 1],
+    depth: 1,
+  });
 
-  drawTriangle()
-})
+  drawTriangle();
+});
