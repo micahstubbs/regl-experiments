@@ -27,8 +27,12 @@ const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) =
   let count = cols * rows;
   let points = new Float32Array(count * 2);
 
-  let col, row;
-  let xPos, yPos, xIndex, yIndex;
+  let col;
+  let row;
+  let xPos;
+  let yPos;
+  let xIndex;
+  let yIndex;
 
   for (let i = 0; i < count; i++) {
     col = i % cols;
@@ -51,8 +55,12 @@ const getAnimStates = (count) => {
   const colors = new Float32Array(count * 3);
   const scales = new Float32Array(count);
 
-  let r, g, b;
-  let rIndex, gIndex, bIndex;
+  let r;
+  let g;
+  let b;
+  let rIndex;
+  let gIndex;
+  let bIndex;
 
   for (let i = 0; i < count; i++) {
     [r, g, b] = randomColor();
@@ -66,7 +74,7 @@ const getAnimStates = (count) => {
     colors[bIndex] = b;
 
     scales[i] = randomScale();
-  };
+  }
 
   return { colors, scales };
 }
@@ -158,7 +166,7 @@ const drawPoints = regl({
   },
 
   uniforms: {
-    maxRadius: maxRadius,
+    maxRadius,
     progress: regl.prop('progress')
   },
 
@@ -201,6 +209,6 @@ regl.frame(({ tick }) => {
     currScales: currState.scales,
     nextColors: nextState.colors,
     nextScales: nextState.scales,
-    progress: progress
+    progress
   });
 })
