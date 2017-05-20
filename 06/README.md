@@ -1,3 +1,5 @@
+now with all-magma 🌋 color scales and a reversed color scale domain so that the circle layout has a hot core and a cool surface 🌎
+
 an iteration on the block [Animate 100,000 points with regl](https://bl.ocks.org/pbeshai/51d05995c5410a52116f89738144c622) from [@pbesh](https://twitter.com/pbesh)
 
 --- 
