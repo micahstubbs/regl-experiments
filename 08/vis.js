@@ -1,3 +1,5 @@
+/* global createREGL document window chroma */
+
 const regl = createREGL();
 
 const doc = document.body;
@@ -8,7 +10,7 @@ const aspectRatio = docHeight / docWidth;
 const colCount = 150;
 const colWidth = docWidth / colCount;
 
-const rowCount = parseInt(colCount * aspectRatio);
+const rowCount = parseInt(colCount * aspectRatio, 10);
 const rowHeight = docHeight / rowCount;
 
 const circleCount = rowCount * colCount;
@@ -24,8 +26,8 @@ const paletteGL = palette.map(c => chroma(c).gl()); // gl mode uses [r,g,b] vect
 const randomColor = () => paletteGL[Math.floor(palette.length * Math.random())];
 
 const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) => {
-  let count = cols * rows;
-  let points = new Float32Array(count * 2);
+  const count = cols * rows;
+  const points = new Float32Array(count * 2);
 
   let col;
   let row;
@@ -34,9 +36,9 @@ const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) =
   let xIndex;
   let yIndex;
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count; i += 1) {
     col = i % cols;
-    row = parseInt(i / cols);
+    row = parseInt(i / cols, 10);
 
     xPos = (col * colWidth) + (colWidth / 2);
     yPos = (row * rowHeight) + (rowHeight / 2);
@@ -44,12 +46,12 @@ const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) =
     xIndex = (2 * i);
     yIndex = xIndex + 1;
 
-    points[xIndex] = (2 * xPos / gridWidth) - 1;  // convert to (-1, 1) GL coord space
-    points[yIndex] = (2 * yPos / gridHeight) - 1; // convert to (-1, 1) GL coord space
+    points[xIndex] = ((2 * xPos) / gridWidth) - 1;  // convert to (-1, 1) GL coord space
+    points[yIndex] = ((2 * yPos) / gridHeight) - 1; // convert to (-1, 1) GL coord space
   }
 
   return points;
-}
+};
 
 const getAnimStates = (count) => {
   const colors = new Float32Array(count * 3);
@@ -62,7 +64,7 @@ const getAnimStates = (count) => {
   let gIndex;
   let bIndex;
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count; i += 1) {
     [r, g, b] = randomColor();
 
     rIndex = (3 * i);
@@ -77,7 +79,7 @@ const getAnimStates = (count) => {
   }
 
   return { colors, scales };
-}
+};
 
 // build inputs for our animation:
 const centroids = getGridPoints(colCount, rowCount, colWidth, rowHeight, docWidth, docHeight);
@@ -92,7 +94,7 @@ while (allStates.length < numStates) {
 
 // regl command featuring shaders that will draw supplied points
 const drawPoints = regl({
-  vert:`
+  vert: `
   precision highp float;
 
   uniform float progress; // interpolation progress (from 0.0 to 1.0)
@@ -118,7 +120,7 @@ const drawPoints = regl({
   }
   `,
 
-  frag:`
+  frag: `
   precision highp float;
 
   varying vec3 rgb;
@@ -148,13 +150,13 @@ const drawPoints = regl({
       srcRGB: 'src alpha',
       srcAlpha: 1,
       dstRGB: 'one minus src alpha',
-      dstAlpha: 1
+      dstAlpha: 1,
     },
     equation: {
       rgb: 'add',
-      alpha: 'add'
+      alpha: 'add',
     },
-    color: [0, 0, 0, 0]
+    color: [0, 0, 0, 0],
   },
 
   attributes: {
@@ -167,12 +169,12 @@ const drawPoints = regl({
 
   uniforms: {
     maxRadius,
-    progress: regl.prop('progress')
+    progress: regl.prop('progress'),
   },
 
   count: circleCount,
 
-  primitive: 'points'
+  primitive: 'points',
 
 });
 
@@ -186,29 +188,30 @@ let state = 0;
 regl.frame(({ tick }) => {
   regl.clear({
     color: [0, 0, 0, 1],
-    depth: 1
-  })
+    depth: 1,
+  });
 
   // increment frame counter until we reach the desired loop point
-  let frame = tick % tweenFrames;
+  const frame = tick % tweenFrames;
 
   // increment state counter once we've looped back around
   if (frame === 0) {
-    state = ++state % numStates;
-  };
+    state = (state + 1) % numStates;
+    // console.log('state counter', state);
+  }
 
   // track progress as proportion of frames completed
-  let progress = frame / tweenFrames;
+  const progress = frame / tweenFrames;
 
   // determine current and next state
-  let currState = allStates[state];
-  let nextState = allStates[(state + 1) % numStates];
+  const currState = allStates[state];
+  const nextState = allStates[(state + 1) % numStates];
 
   drawPoints({
     currColors: currState.colors,
     currScales: currState.scales,
     nextColors: nextState.colors,
     nextScales: nextState.scales,
-    progress
+    progress,
   });
-})
+});
