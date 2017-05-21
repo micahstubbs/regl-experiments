@@ -93,7 +93,7 @@ const getAnimStates = (count) => {
 const centroids = getGridPoints(colCount, rowCount, colWidth, rowHeight, docWidth, docHeight);
 
 // create a series of animation states for each circle
-const numStates = 50;
+const numStates = 300;
 const allStates = [];
 
 while (allStates.length < numStates) {
@@ -139,7 +139,7 @@ const drawPoints = regl({
     float point_dist = length(gl_PointCoord * 2. - 1.);
 
     // calc scale at which to start fading out the circle
-    float min_dist = scale * 0.70;
+    float min_dist = scale * 0.001;
 
     // calc scale at which we find the edge of the circle
     float max_dist = scale;
@@ -188,7 +188,7 @@ const drawPoints = regl({
 
 // render loop
 const fps = 60;
-const tweenTime = 2;
+const tweenTime = 0.75; 
 const tweenFrames = fps * tweenTime;
 
 let state = 0;
