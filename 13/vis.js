@@ -1,4 +1,4 @@
-/* global createREGL document window */
+/* global createREGL document window chroma */
 
 const regl = createREGL();
 
@@ -7,7 +7,7 @@ const docWidth = window.innerWidth;
 const docHeight = window.innerHeight;
 const aspectRatio = docHeight / docWidth;
 
-const colCount = 100;
+const colCount = 50;
 const colWidth = docWidth / colCount;
 
 const rowCount = parseInt(colCount * aspectRatio, 10);
@@ -17,8 +17,10 @@ const circleCount = rowCount * colCount;
 const maxRadius = Math.min(colWidth, rowHeight) / 2;
 
 const minScale = 1e-6; // use small number to avoid reaching zero
-const maxScale = 1.0;
-const randomScale = () => minScale + ((maxScale - minScale) * Math.random());
+const maxScale = 2.00;
+
+const remapSin = i => 0.5 + (Math.sin(i) * 0.5);
+const remapCos = i => 0.5 + (Math.cos(i) * 0.5);
 
 // sample nine colors from the magma color space
 const palette = [0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0].map(t => d3.interpolateMagma(t));
@@ -31,7 +33,11 @@ const paletteGL = palette.map(d => {
 }); 
 console.log('paletteGL', paletteGL);
 
-const randomColor = () => paletteGL[Math.floor(palette.length * Math.random())];
+// const palette = chroma.brewer.PuBu.slice(5, 10);
+// const paletteGL = palette.map(c => chroma(c).gl()); // gl mode uses [r,g,b] vector w normalised values
+
+const randomScale = i => minScale + ((maxScale - minScale) * remapCos(i));
+const randomColor = i => paletteGL[Math.floor(palette.length * remapSin(i))];
 
 const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) => {
   const count = cols * rows;
@@ -61,7 +67,7 @@ const getGridPoints = (cols, rows, colWidth, rowHeight, gridWidth, gridHeight) =
   return points;
 };
 
-const getAnimStates = (count) => {
+const getAnimStates = (count, done) => {
   const colors = new Float32Array(count * 3);
   const scales = new Float32Array(count);
 
@@ -73,7 +79,7 @@ const getAnimStates = (count) => {
   let bIndex;
 
   for (let i = 0; i < count; i += 1) {
-    [r, g, b] = randomColor();
+    [r, g, b] = randomColor(i * done);
 
     rIndex = (3 * i);
     gIndex = rIndex + 1;
@@ -83,7 +89,7 @@ const getAnimStates = (count) => {
     colors[gIndex] = g;
     colors[bIndex] = b;
 
-    scales[i] = randomScale();
+    scales[i] = randomScale(i * done);
   }
 
   return { colors, scales };
@@ -93,11 +99,11 @@ const getAnimStates = (count) => {
 const centroids = getGridPoints(colCount, rowCount, colWidth, rowHeight, docWidth, docHeight);
 
 // create a series of animation states for each circle
-const numStates = 300;
+const numStates = 50;
 const allStates = [];
 
 while (allStates.length < numStates) {
-  allStates.push(getAnimStates(circleCount));
+  allStates.push(getAnimStates(circleCount, allStates.length));
 }
 
 // regl command featuring shaders that will draw supplied points
@@ -139,31 +145,35 @@ const drawPoints = regl({
     float point_dist = length(gl_PointCoord * 2. - 1.);
 
     // calc scale at which to start fading out the circle
-    float min_dist = scale * 0.001;
+    float min_dist = 0.95; //scale * 0.90;
 
     // calc scale at which we find the edge of the circle
-    float max_dist = scale;
+    float max_dist = 1.00;//scale;
 
     // https://thebookofshaders.com/glossary/?search=smoothstep
     float alpha = 1. - smoothstep(min_dist, max_dist, point_dist);
 
-    gl_FragColor = vec4(rgb, alpha);
+    gl_FragColor = vec4(rgb, alpha * 0.85);
   }
   `,
 
   // using textbook example from http://regl.party/api#blending
+
+  depth: {
+    enable: false,
+  },
+
   blend: {
     enable: true,
     func: {
       srcRGB: 'src alpha',
-      srcAlpha: 1,
-      dstRGB: 'one minus src alpha',
-      dstAlpha: 1,
+      srcAlpha: 'src color',
+      dstRGB: 'one',
+      dstAlpha: 'one',
+      // src: 'one',
+      // dst: 'one'
     },
-    equation: {
-      rgb: 'add',
-      alpha: 'add',
-    },
+    equation: 'add',
     color: [0, 0, 0, 0],
   },
 
@@ -188,7 +198,7 @@ const drawPoints = regl({
 
 // render loop
 const fps = 60;
-const tweenTime = 0.75; 
+const tweenTime = 6;
 const tweenFrames = fps * tweenTime;
 
 let state = 0;
