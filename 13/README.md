@@ -1,4 +1,4 @@
-magma all the things 🌋
+[magma](https://github.com/d3/d3-scale#interpolateMagma) all the things 🌋
 
 
 
